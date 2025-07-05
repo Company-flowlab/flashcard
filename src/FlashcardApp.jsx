@@ -95,7 +95,7 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
       let chatHistory = [];
       chatHistory.push({ role: "user", parts: [{ text: prompt }] });
       const payload = { contents: chatHistory };
-      const apiKey = import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
+      const apiKey = import.meta.env.GOOGLE_GEMINI_API_KEY;
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
