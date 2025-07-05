@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -93,49 +92,27 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
     }
 
     try {
-      let chatHistory = [];
-      chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-      const payload = { contents: chatHistory };
-      
-      // CORREÇÃO AQUI: Mudança para usar a variável correta do Vercel
-      const apiKey = process.env.GOOGLE_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
-      
-      // Debug para verificar se a chave está sendo lida
-      console.log('API Key found:', apiKey ? 'Yes' : 'No');
-      
-      if (!apiKey) {
-        throw new Error('API Key não encontrada. Verifique as variáveis de ambiente.');
-      }
-      
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-      const response = await fetch(apiUrl, {
+      // Agora usa nossa API route interna
+      const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ prompt })
       });
 
       if (!response.ok) {
-        throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Erro na API: ${response.status}`);
       }
 
       const result = await response.json();
 
-      if (result.candidates && result.candidates.length > 0 &&
-          result.candidates[0].content && result.candidates[0].content.parts &&
-          result.candidates[0].content.parts.length > 0) {
-        let text = result.candidates[0].content.parts[0].text;
-        // Remove markdown code block wrappers if they exist
-        text = text.replace(/```json\n?|\n?```/g, '');
-        const cards = JSON.parse(text);
-        setFlashcards(cards);
+      if (result.success && result.flashcards) {
+        setFlashcards(result.flashcards);
         setCurrentIndex(0);
         setFlipped(false);
         setMode('study');
       } else {
-        console.error('Estrutura de resposta inesperada ou conteúdo ausente:', result);
-        alert('Falha ao gerar flashcards. Por favor, tente novamente.');
-        setMode('create');
+        throw new Error('Resposta inesperada da API');
       }
     } catch (error) {
       console.error('Erro ao gerar flashcards:', error);
