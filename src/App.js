@@ -1,8 +1,11 @@
-import React from 'react';
-import FlashcardApp from './FlashcardApp';
+import FlashcardApp from './FlashcardApp'; // Importa o componente FlashcardApp
 
 function App() {
-  return <FlashcardApp />;
+  return (
+    // Renderiza o componente FlashcardApp
+    <FlashcardApp />
+  );
 }
 
 export default App;
+
