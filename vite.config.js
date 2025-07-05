@@ -3,8 +3,5 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/flashcard/',
-  build: {
-    outDir: 'dist',
-  },
+  // Remove o base completamente para Vercel
 });
