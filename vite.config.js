@@ -1,23 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path'; // Importa o módulo 'path' para resolver caminhos
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   // Define a base para o deploy (GitHub Pages)
-  base: '/', // O '/' é crucial para o GitHub Pages
+  base: '/',
   build: {
-    // Define o diretório de saída para os arquivos compilados (padrão é 'dist')
-    outDir: 'dist',
-    // Define o diretório para os assets (CSS, JS, imagens) dentro de 'outDir'
-    assetsDir: 'assets',
-    // Garante que o Vite não tente resolver o index.html como um módulo JS
-    // Isso é geralmente o padrão, mas explicitamos para evitar o erro
     rollupOptions: {
-      // Input não é mais necessário aqui, o Vite lida com isso automaticamente
-      // se o index.html estiver em 'public' e main.jsx em 'src'
+      input: {
+        // Define explicitamente o index.html como o ponto de entrada principal para o build
+        // Usa path.resolve para garantir que o caminho seja absoluto e correto
+        main: path.resolve(__dirname, 'public', 'index.html'),
+      },
     },
   },
-  // Define o diretório público onde o index.html está
-  publicDir: 'public',
 });
