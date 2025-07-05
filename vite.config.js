@@ -1,9 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path'; // Importa o módulo 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Adicione esta linha para garantir que o Vite sirva a partir da raiz
+  // Define a base para o deploy (GitHub Pages)
   base: '/',
+  // Configurações de build
+  build: {
+    rollupOptions: {
+      input: {
+        // Define o index.html como o ponto de entrada principal para o build
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
+  },
 });
