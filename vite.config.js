@@ -11,8 +11,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        // Define o index.html como o ponto de entrada principal para o build
-        main: path.resolve(__dirname, 'index.html'),
+        // Define o index.html dentro da pasta 'public' como o ponto de entrada principal para o build
+        main: path.resolve(__dirname, 'public', 'index.html'), // <-- Caminho corrigido aqui
       },
     },
   },
