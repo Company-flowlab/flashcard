@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -95,7 +96,17 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
       let chatHistory = [];
       chatHistory.push({ role: "user", parts: [{ text: prompt }] });
       const payload = { contents: chatHistory };
-      const apiKey = import.meta.env.GOOGLE_GEMINI_API_KEY;
+      
+      // CORREÇÃO AQUI: Mudança para usar a variável correta do Vercel
+      const apiKey = process.env.GOOGLE_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+      
+      // Debug para verificar se a chave está sendo lida
+      console.log('API Key found:', apiKey ? 'Yes' : 'No');
+      
+      if (!apiKey) {
+        throw new Error('API Key não encontrada. Verifique as variáveis de ambiente.');
+      }
+      
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
@@ -103,6 +114,10 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
+      if (!response.ok) {
+        throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+      }
 
       const result = await response.json();
 
@@ -124,7 +139,7 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
       }
     } catch (error) {
       console.error('Erro ao gerar flashcards:', error);
-      alert('Falha ao gerar flashcards. Por favor, tente novamente.');
+      alert(`Falha ao gerar flashcards: ${error.message}`);
       setMode('create');
     }
   };
