@@ -92,31 +92,39 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
     }
 
     try {
-      // Agora usa nossa API route interna
-      const response = await fetch('/api/gemini', {
+      // Faz a chamada para o seu próprio endpoint de backend proxy no Vercel
+      // O caminho é '/api/generate-flashcards' para corresponder ao nome do arquivo na pasta 'api'
+      const response = await fetch('/api/generate-flashcards', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }), // Envia o prompt para o backend
       });
 
+      // Verifica se a resposta foi bem-sucedida (status 2xx)
       if (!response.ok) {
+        // Tenta ler o erro do corpo da resposta do servidor
         const errorData = await response.json();
-        throw new Error(errorData.error || `Erro na API: ${response.status}`);
+        throw new Error(errorData.error || `Erro do servidor: ${response.status}`);
       }
 
-      const result = await response.json();
+      // Converte a resposta para JSON. A função serverless já retorna o array de flashcards diretamente.
+      const cards = await response.json();
 
-      if (result.success && result.flashcards) {
-        setFlashcards(result.flashcards);
+      // Verifica se a resposta é um array e contém objetos com 'front' e 'back'
+      if (Array.isArray(cards) && cards.every(card => typeof card.front === 'string' && typeof card.back === 'string')) {
+        setFlashcards(cards);
         setCurrentIndex(0);
         setFlipped(false);
         setMode('study');
       } else {
-        throw new Error('Resposta inesperada da API');
+        throw new Error('Formato de flashcards inválido recebido do servidor.');
       }
+
     } catch (error) {
       console.error('Erro ao gerar flashcards:', error);
-      alert(`Falha ao gerar flashcards: ${error.message}`);
+      alert(`Falha ao gerar flashcards: ${error.message}. Por favor, tente novamente.`);
       setMode('create');
     }
   };
