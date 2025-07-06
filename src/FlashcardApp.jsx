@@ -92,39 +92,43 @@ Forneça exatamente 10 flashcards neste formato JSON - não inclua nenhum texto 
     }
 
     try {
-      // Faz a chamada para o seu próprio endpoint de backend proxy no Vercel
-      // O caminho é '/api/generate-flashcards' para corresponder ao nome do arquivo na pasta 'api'
-      const response = await fetch('/api/generate-flashcards', {
+      // Usar nossa nova API route
+      const response = await fetch('/api/gemini', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }), // Envia o prompt para o backend
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
       });
 
-      // Verifica se a resposta foi bem-sucedida (status 2xx)
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        // Tenta ler o erro do corpo da resposta do servidor
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Erro do servidor: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`Erro na API: ${response.status} - ${errorText}`);
       }
 
-      // Converte a resposta para JSON. A função serverless já retorna o array de flashcards diretamente.
-      const cards = await response.json();
+      const result = await response.json();
+      console.log('API Response:', result);
 
-      // Verifica se a resposta é um array e contém objetos com 'front' e 'back'
-      if (Array.isArray(cards) && cards.every(card => typeof card.front === 'string' && typeof card.back === 'string')) {
-        setFlashcards(cards);
+      if (result && Array.isArray(result) && result.length > 0) {
+        // Resposta direta como array
+        setFlashcards(result);
+        setCurrentIndex(0);
+        setFlipped(false);
+        setMode('study');
+      } else if (result && result.success && Array.isArray(result.flashcards)) {
+        // Resposta com wrapper de sucesso
+        setFlashcards(result.flashcards);
         setCurrentIndex(0);
         setFlipped(false);
         setMode('study');
       } else {
-        throw new Error('Formato de flashcards inválido recebido do servidor.');
+        console.error('Resposta inesperada:', result);
+        throw new Error('Formato de resposta inesperado da API');
       }
-
     } catch (error) {
       console.error('Erro ao gerar flashcards:', error);
-      alert(`Falha ao gerar flashcards: ${error.message}. Por favor, tente novamente.`);
+      alert(`Falha ao gerar flashcards: ${error.message}`);
       setMode('create');
     }
   };
