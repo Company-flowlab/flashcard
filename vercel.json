@@ -5,6 +5,11 @@
       "destination": "/api/$1"
     }
   ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",
